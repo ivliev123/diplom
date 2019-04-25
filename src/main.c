@@ -65,7 +65,9 @@ static void MX_TIM1_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+void clock(void);
+void lat(void);
+void oe(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -114,86 +116,128 @@ int main(void)
   int capture = 0;
   char buf[25];
 
-  int Y = 10;
-  int X = 30;
-  int PANEL_X_MAX=64;
+//  int Y = 10;
+  int X = 0;
+  int PANEL_X_MAX=128;
+
+//  int pixel[32][128];
+
+//  for (int j = 0; j<32; j++ ){
+//	  for (int i = 0; i<PANEL_X_MAX; i++ ){
+//		  pixel[j][i] =1;
+//	  }
+//  }
+
+  uint8_t test[16][12]={
+		  {0,0,0,0,0,1,1,0,0,0,0,0},
+		  {0,0,0,1,1,1,1,1,1,0,0,0},
+		  {0,0,1,1,1,1,1,1,1,1,0,0},
+		  {0,1,1,1,1,1,1,1,1,1,1,0},
+		  {0,1,1,1,1,1,1,1,1,1,1,0},
+		  {0,1,1,1,1,0,0,1,1,1,1,0},
+		  {1,1,1,1,0,0,0,0,1,1,1,1},
+		  {1,1,1,1,0,0,0,0,1,1,1,1},
+		  {1,1,1,1,0,0,0,0,1,1,1,1},
+		  {1,1,1,1,0,0,0,0,1,1,1,1},
+		  {0,1,1,1,1,0,0,1,1,1,1,0},
+		  {0,1,1,1,1,1,1,1,1,1,1,0},
+		  {0,1,1,1,1,1,1,1,1,1,1,0},
+		  {0,0,1,1,1,1,1,1,1,1,0,0},
+		  {0,0,0,1,1,1,1,1,1,0,0,0},
+		  {0,0,0,0,0,1,1,0,0,0,0,0}
+  };
+
+
+
 
   while (1)
   {
-
 	  capture = TIM1->CNT;
 	  X = round(capture/100);
-	  sprintf(buf,"count: [%ld]\n", capture);
-	  HAL_UART_Transmit_DMA(&huart3,buf,sizeof(buf)-1);
-
-	  for( int j = 0; j<=32;j++){
-	  Y= j;
+//	  sprintf(buf,"count: [%ld]\n", capture);
+//	  HAL_UART_Transmit_DMA(&huart3,buf,sizeof(buf)-1);
 
 
-	  if (Y & 0x01) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
-	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
 
-	  if (Y & 0x02) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_SET);
-	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_RESET);
-
-	  if (Y & 0x04) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_SET);
-	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_RESET);
-
-	  if (Y & 0x08) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_3,GPIO_PIN_SET);
-	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_3,GPIO_PIN_RESET);
-
-	  for (uint8_t i = 0; i < PANEL_X_MAX; i++)
-	  {
-	  if (i != X)
-	  {
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_RESET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_RESET);
-
-//	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-//	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-//	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET);
+	  uint8_t pixel[32][128];
+	  for (int j = 0; j < 32; j++)
+		  {
+		  	  for (int i = 0; i < PANEL_X_MAX; i++)
+		 		  {
+		  		  	  pixel[j][i]=0;
+		 		  }
+		  }
 
 
-	  }
-	  else {
-	  if (Y <= 16)
-	  {
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_3,GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_5,GPIO_PIN_SET);
-	  }
-	  else
-	  {
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_6,GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,GPIO_PIN_SET);
-	  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,GPIO_PIN_SET);
-	  }
-	  }
-	  //clock
+	  for (int j = 0; j < 16; j++)
+		  {
+		  	  for (int i = 0; i < 12; i++)
+		 		  {
+		  		  	  pixel[j][X + i]=test[j][i];
+		 		  }
+		  }
+
+	  int Y = 0;
+	  for( int j = 0; j<16;j++){
+//		  HAL_Delay(1);
+		  for(int d=0;d<0x500;d++);
+
+		  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);
+		  Y= j;
+
+		  sprintf(buf,"count: [%ld]\n", Y);
+		  HAL_UART_Transmit_DMA(&huart3,buf,sizeof(buf)-1);
+
+		  set_row(Y);
+//		  Y++;
+		  int x = 0;
+		  for (int i = 0; i < PANEL_X_MAX; i++)
+		  {
+			  //top
+			  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_4,pixel[Y][i]);
+			  //bottom
+			  HAL_GPIO_WritePin(GPIOB,GPIO_PIN_7,pixel[Y+16][i]);
+
+			  clock();
+		  } // for X
+		  lat();
+//		  oe();
+		  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_RESET);
+	  } // for Y
+
+
+	} //while
+
+  } //main
+
+void clock(){
 	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,GPIO_PIN_RESET);
 	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_4,GPIO_PIN_SET);
-	  }
-	  }
-	  // LAT
+}
+
+void lat(){
 	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);
 	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_SET);
 	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_6,GPIO_PIN_RESET);
-
-	  //OE
+}
+void oe(){
 	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_SET);
 	  HAL_GPIO_WritePin(GPIOA,GPIO_PIN_5,GPIO_PIN_RESET);
+}
 
+void set_row(int row){
+	  if (row & 0x01) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_SET);
+	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_0,GPIO_PIN_RESET);
 
+	  if (row & 0x02) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_SET);
+	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_1,GPIO_PIN_RESET);
 
-	} //for Y
+	  if (row & 0x04) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_SET);
+	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_2,GPIO_PIN_RESET);
 
-  }
-  /* USER CODE END 3 */
-
+	  if (row & 0x08) HAL_GPIO_WritePin(GPIOA,GPIO_PIN_3,GPIO_PIN_SET);
+	  else HAL_GPIO_WritePin(GPIOA,GPIO_PIN_3,GPIO_PIN_RESET);
+}
 
 
 /**
@@ -256,7 +300,7 @@ static void MX_TIM1_Init(void)
   htim1.Instance = TIM1;
   htim1.Init.Prescaler = 0;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = 6400;
+  htim1.Init.Period = 12800;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim1.Init.RepetitionCounter = 0;
   htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
